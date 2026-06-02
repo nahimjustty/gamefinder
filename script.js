@@ -1,5 +1,5 @@
 // REPLACE THIS URL WITH YOUR LIVE RENDER WEB SERVICE LINK
-const API = "https://your-app-name.onrender.com";
+const API = "https://gamefinder-z4s3.onrender.com";
 let currentPage = 1;
 
 async function loadGenres() {
