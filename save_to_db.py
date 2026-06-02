@@ -1,9 +1,13 @@
+import os
+import re
+import time
+from bs4 import BeautifulSoup
 from pymongo import MongoClient
 import requests
-from bs4 import BeautifulSoup
-import time
 
-client = MongoClient("mongodb://localhost:27017/")
+# Fallback to local if MONGO_URI isn't set on your machine
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+client = MongoClient(MONGO_URI)
 db = client["gamefinder2"]
 collection = db["games"]
 
@@ -23,15 +27,16 @@ while True:
         continue
 
     if response.status_code != 200:
-        print(f"Stopped at page {page}")
+        print(f"Stopped at page {page} (Status Code: {response.status_code})")
         break
 
     soup = BeautifulSoup(response.text, "html.parser")
     games = soup.find_all("article")
     if not games:
+        print(f"No articles found on page {page}. Finalizing.")
         break
 
-    batch = []
+    saved_count = 0
     for game in games:
         title_tag = game.find("h1", class_="entry-title")
         if not title_tag:
@@ -55,31 +60,40 @@ while True:
             continue
 
         try:
-            size_gb = float(repack_size_raw.lower()
-                          .replace("gb", "")
-                          .replace("from", "")
-                          .replace("[selective download]", "")
-                          .strip()
-                          .split()[0])
+            # Clean up the size string to get a raw float value
+            cleaned_size = (repack_size_raw.lower()
+                            .replace("gb", "")
+                            .replace("from", "")
+                            .replace("[selective download]", "")
+                            .replace(",", ".")
+                            .strip())
+            size_gb = float(cleaned_size.split()[0])
         except:
             size_gb = 0
 
         genres = [a.text for a in p_tag.find_all("a") if "/tag/" in a.get("href", "")]
         link = title_tag.find("a")["href"]
 
-        batch.append({
+        game_item = {
             "title": title,
             "size_raw": repack_size_raw,
             "size_gb": size_gb,
             "genres": genres,
-            "link": link
-        })
+            "link": link,
+            "source": "FitGirl"  # Added a helpful source identifier for your UI badge
+        }
 
-    if batch:
-        collection.insert_many(batch)
-        print(f"Page {page} done — {len(batch)} games saved")
+        # Prevent duplicate entries by updating existing links or inserting new ones
+        collection.update_one(
+            {"link": link},
+            {"$set": game_item},
+            upsert=True
+        )
+        saved_count += 1
 
+    print(f"Page {page} done — {saved_count} games processed/saved")
+    
     page += 1
-    time.sleep(1)
+    time.sleep(1.5)  # Slightly gentler delay for remote DB connections
 
-print(f"Done! Total: {collection.count_documents({})} games")
+print(f"Done! Total database count: {collection.count_documents({})} games")

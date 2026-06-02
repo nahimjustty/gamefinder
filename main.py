@@ -1,14 +1,24 @@
+import os
+import math
+import re
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
-import math
-import re
 import uvicorn
 
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-db = MongoClient("mongodb://localhost:27017/")["gamefinder2"]
+# Enable CORS for cross-origin frontend requests (Vercel -> Render)
+app.add_middleware(
+    CORSMiddleware, 
+    allow_origins=["*"], 
+    allow_methods=["*"], 
+    allow_headers=["*"]
+)
+
+# Connect to MongoDB Atlas if MONGO_URI env variable exists; fall back to localhost
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+db = MongoClient(MONGO_URI)["gamefinder2"]
 
 def parse_size_to_gb(size_str):
     if not size_str or size_str in ("N/A", "JUNK", ""):
@@ -112,4 +122,6 @@ async def filter_games(
     return {"games": games, "total": total, "pages": pages}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Render overrides port with environment variable, but defaults to 8000 locally
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

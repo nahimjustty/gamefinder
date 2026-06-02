@@ -1,4 +1,5 @@
-const API = "http://localhost:8000";
+// REPLACE THIS URL WITH YOUR LIVE RENDER WEB SERVICE LINK
+const API = "https://your-app-name.onrender.com";
 let currentPage = 1;
 
 async function loadGenres() {
@@ -6,6 +7,7 @@ async function loadGenres() {
         const res = await fetch(`${API}/genres`);
         const genres = await res.json();
         const select = document.getElementById("genre");
+        if (!select) return;
         select.innerHTML = '<option value="">All Genres</option>';
         genres.forEach(g => {
             select.innerHTML += `<option value="${g}">${g}</option>`;
@@ -79,17 +81,17 @@ async function searchGames(page = 1) {
             const synopsis = game.synopsis && game.synopsis !== "No description available."
                 ? `<div style="color:#aaa;font-size:0.78rem;margin-bottom:10px;line-height:1.4">${game.synopsis.slice(0, 120)}...</div>`
                 : "";
-const sourceBadge = `<span class="source-badge">${game.source || "?"}</span>`;
-const mirrors = game.mirrors || [];
-const mirrorHTML = mirrors.length
-    ? `<div class="mirror-badges">
-         ${mirrors.map(m => `
-            <span class="mirror-badge ${m.toLowerCase().includes('fucking') || m.toLowerCase().includes('fast') ? 'fast' : ''}">
-                ⚡ ${m}
-            </span>
-         `).join("")}
-       </div>`
-    : "";
+            const sourceBadge = `<span class="source-badge">${game.source || "?"}</span>`;
+            const mirrors = game.mirrors || [];
+            const mirrorHTML = mirrors.length
+                ? `<div class="mirror-badges">
+                     ${mirrors.map(m => `
+                        <span class="mirror-badge ${m.toLowerCase().includes('fucking') || m.toLowerCase().includes('fast') ? 'fast' : ''}">
+                            ⚡ ${m}
+                        </span>
+                     `).join("")}
+                   </div>`
+                : "";
 
             results.innerHTML += `
                 <div class="game-card">
