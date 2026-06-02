@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameFinder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main>
+        <h1>GameFinder</h1>
+        <h2>Find Your Next Favorite Game Based on Game Size, Genre, Rating</h2>
+        <h3>Sources: 
+            <a href="https://fitgirl-repacks.site/" target="_blank">FitGirl</a> · 
+            <a href="https://steamrip.com/" target="_blank">SteamRIP</a>
+        </h3>
+    </main>
+
+    <div class="filters">
+        <input type="text" id="gameTitle" placeholder="Search title..." />
+        <input type="number" id="maxSize" placeholder="Max size (GB)" step="0.1" min="0" />
+        <select id="genre">
+            <option value="">All Genres</option>
+        </select>
+        <select id="mirrorFilter">
+            <option value="">All Mirrors</option>
+        </select>
+        <select id="sortOrder">
+            <option value="newest">Newest First</option>
+            <option value="size_asc">Size: Smallest First</option>
+            <option value="size_desc">Size: Largest First</option>
+        </select>
+        <input type="number" id="gameRating" placeholder="Min Rating" min="1" max="10" step="0.5" />
+        <button onclick="searchGames()">Search</button>
+    </div>
+
+    <p id="count"></p>
+    <div id="results"></div>
+    <div id="pagination"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
