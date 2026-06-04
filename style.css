@@ -243,3 +243,33 @@ button:active {
   padding: 2rem 1rem;
   flex-wrap: wrap;
 }
+
+.logo-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 4px;
+}
+
+.logo-icon {
+    width: 52px;
+    height: 52px;
+    filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.5));
+}
+
+.reset-btn {
+    background: transparent;
+    color: #ff4444;
+    border: 1px solid #ff4444;
+    box-shadow: none;
+    width: auto;
+    padding: 10px 18px;
+}
+
+.reset-btn:hover {
+    background: #ff4444;
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 68, 68, 0.4);
+    transform: translateY(-1px);
+}

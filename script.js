@@ -32,6 +32,16 @@ async function loadMirrors() {
     }
 }
 
+function resetFilters() {
+  document.getElementById("gameTitle").value = "";
+  document.getElementById("maxSize").value = "";
+  document.getElementById("genre").value = "";
+  document.getElementById("mirrorFilter").value = "";
+  document.getElementById("sortOrder").value = "newest";
+  document.getElementById("gameRating").value = "";
+  searchGames();
+}
+
 async function searchGames(page = 1) {
     currentPage = page;
 
