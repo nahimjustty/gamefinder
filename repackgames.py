@@ -25,14 +25,32 @@ HEADERS = {
     "Referer": BASE_URL,
 }
 
-CATEGORIES = [
-    "action", "adventure", "rpg", "simulation", "strategy",
-    "sports", "racing", "indie", "casual", "puzzle",
-    "horror", "fighting", "shooter"
-]
+CATEGORIES = {
+    "action-games": "Action",
+    "adventure-games": "Adventure",
+    "rpg-pc-games": "RPG",
+    "simulation-game": "Simulation",
+    "strategy-games": "Strategy",
+    "sport-game": "Sports",
+    "racing-game": "Racing",
+    "puzzle": "Puzzle",
+    "horror-games": "Horror",
+    "fighting-games": "Fighting",
+    "shooting-games": "Shooter",
+    "survival-games": "Survival",
+    "open-world-game": "Open World",
+    "multiplayer-games": "Multiplayer",
+    "sci-fi-games": "Sci-Fi",
+}
 
-JUNK_WORDS = ["faq", "troubleshooting", "about", "donations",
-              "contact", "adult", "porn", "comics", "dmca"]
+JUNK_WORDS = [
+    "faq", "troubleshooting", "about", "donations", "contact",
+    "comics", "dmca", "sexy", "femboy", "futa", "hentai", "nsfw",
+    "18+", "porn", "adult", "nudity", "uncensored", "erotic",
+    "meat urinal", "lucky bastard", "freshwomen", "being a dik",
+    "fallen doll", "corruption", "temptation", "hardest interview",
+    "lisc season", "our meat", "free love"
+]
 
 def is_real_game(title):
     return not any(word in title.lower() for word in JUNK_WORDS)
@@ -45,17 +63,16 @@ def fix_url(href):
     return BASE_URL + "/" + href.lstrip("/")
 
 def get_game_links_from_soup(soup):
-    """Extract game title+link pairs from a page."""
     game_links = []
 
-    # Primary: h3 a (confirmed working)
+    # Primary: h3 a
     for a in soup.select("h3 a"):
         title = a.get_text(strip=True)
         link = fix_url(a.get("href", ""))
         if title and link and len(title) > 3:
             game_links.append((title, link))
 
-    # Fallback: li > a > strong (the list format we saw in HTML)
+    # Fallback: li > a > strong
     if not game_links:
         for a in soup.select("li a"):
             strong = a.find("strong")
@@ -76,9 +93,15 @@ def get_game_links_from_soup(soup):
 
 def get_deep_details(url):
     try:
-        time.sleep(random.uniform(0.8, 1.5))
-        res = scraper.get(url, headers=HEADERS, timeout=15)
+        time.sleep(random.uniform(1, 2))
+        res = scraper.get(url, headers=HEADERS, timeout=30)
         soup = BeautifulSoup(res.text, "html.parser")
+
+        # Skip adult games
+        for a in soup.select(".single-category a"):
+            href = a.get("href", "")
+            if "adult" in href or "nudity" in href:
+                return None, None, None, None
 
         # Cover
         og = soup.select_one('meta[property="og:image"]')
@@ -88,7 +111,8 @@ def get_deep_details(url):
         size = "N/A"
         full_text = soup.get_text()
         for pattern in [
-            r'(?:Repack Size|Game Size|Size)[:\s]*([\d.,]+\s*(?:MB|GB))',
+            r'[Gg]ame\s*[Ss]ize[:\s]*([\d.,]+\s*(?:MB|GB))',
+            r'(?:Repack Size|Size)[:\s]*([\d.,]+\s*(?:MB|GB))',
             r'([\d.,]+\s*GB)',
         ]:
             match = re.search(pattern, full_text, re.IGNORECASE)
@@ -96,15 +120,20 @@ def get_deep_details(url):
                 size = match.group(1).strip()
                 break
 
-        # Genres
+        # Genres — use single-category class
         genres = []
-        for a in soup.select("a[rel='category tag'], .cat-links a, "
-                             ".entry-meta a, [class*='category'] a"):
+        skip_genres = [
+            "best pc games to play", "top games", "recently updated",
+            "adult games", "porn games", "comics", "3d comics",
+            "emulator games", "top pc games"
+        ]
+        for a in soup.select(".single-category a"):
             text = a.get_text(strip=True)
-            if text and len(text) < 25 and text.lower() not in [
-                "read more", "download", "repack-games", "free download"
-            ]:
-                genres.append(text)
+            if text and len(text) < 30 and not any(
+                s in text.lower() for s in skip_genres
+            ):
+                genres.append(text.title())
+
         genres = list(dict.fromkeys(genres))[:5]
         if not genres:
             genres = ["Games"]
@@ -113,8 +142,9 @@ def get_deep_details(url):
         synopsis = "RepackGames."
         for p in soup.select(".entry-content p, .post-content p"):
             text = p.get_text(strip=True)
-            if len(text) > 80 and not any(w in text.lower() for w in
-                    ["genre", "size", "language", "repack", "download", "click"]):
+            if len(text) > 80 and not any(w in text.lower() for w in [
+                "genre", "size", "language", "repack", "download", "click"
+            ]):
                 synopsis = text[:150] + "..."
                 break
 
@@ -124,19 +154,22 @@ def get_deep_details(url):
         print(f"    ⚠️  Deep scrape failed: {e}")
         return "N/A", ["Games"], "No description available.", ""
 
-def get_resume_page(cat):
-    doc = progress.find_one({"source": f"repackgames_{cat}"})
+def get_resume_page(slug):
+    doc = progress.find_one({"source": f"repackgames_{slug}"})
     return doc["last_page"] if doc else 0
 
-def save_resume_page(cat, page):
+def save_resume_page(slug, page):
     progress.update_one(
-        {"source": f"repackgames_{cat}"},
+        {"source": f"repackgames_{slug}"},
         {"$set": {"last_page": page}},
         upsert=True
     )
 
+def reset_progress():
+    result = progress.delete_many({"source": {"$regex": "repackgames_"}})
+    print(f"✅ Progress reset — {result.deleted_count} entries cleared")
+
 def scrape_latest(pages=10):
-    """Scrape homepage/latest pages."""
     print(f"🚀 REPACKGAMES: Scraping {pages} latest pages...")
     inserted = 0
 
@@ -144,124 +177,159 @@ def scrape_latest(pages=10):
         url = f"{BASE_URL}/page/{page}/" if page > 1 else f"{BASE_URL}/"
         print(f"  📂 Page {page}...")
 
-        try:
-            res = scraper.get(url, headers=HEADERS, timeout=20)
-            if res.status_code == 404:
+        res = None
+        for attempt in range(3):
+            try:
+                res = scraper.get(url, headers=HEADERS, timeout=30)
                 break
+            except Exception as e:
+                wait = (attempt + 1) * 5
+                print(f"  ⚠️  Attempt {attempt+1} failed, retrying in {wait}s...")
+                time.sleep(wait)
 
-            soup = BeautifulSoup(res.text, "html.parser")
-            game_links = get_game_links_from_soup(soup)
+        if not res:
+            print(f"  ❌ Page {page} failed after 3 attempts, skipping")
+            continue
 
-            if not game_links:
-                print(f"  🏁 No games on page {page}")
-                break
-
-            print(f"  Found {len(game_links)} games")
-
-            for title, link in game_links:
-                if not is_real_game(title):
-                    continue
-                if any(s in link for s in ["/category/", "/tag/", "/page/", "#"]):
-                    continue
-                if collection.find_one({"link": link}):
-                    continue
-
-                print(f"    📦 {title[:55]}...")
-                size, genres, synopsis, cover = get_deep_details(link)
-                print(f"        → {size} | {genres[:2]}")
-
-                collection.insert_one({
-                    "title": title,
-                    "link": link,
-                    "source": "RepackGames",
-                    "cover": cover,
-                    "rating": 5.0,
-                    "genres": genres,
-                    "size_raw": size,
-                    "synopsis": synopsis
-                })
-                inserted += 1
-
-            print(f"  ✅ Page {page} done")
-            time.sleep(random.uniform(2, 4))
-
-        except Exception as e:
-            print(f"  ❌ Page {page} error: {e}")
+        if res.status_code == 404:
             break
+
+        soup = BeautifulSoup(res.text, "html.parser")
+        game_links = get_game_links_from_soup(soup)
+
+        if not game_links:
+            print(f"  🏁 No games on page {page}")
+            break
+
+        print(f"  Found {len(game_links)} games")
+
+        for title, link in game_links:
+            if not is_real_game(title):
+                continue
+            if any(s in link for s in ["/category/", "/tag/", "/page/", "#"]):
+                continue
+            if collection.find_one({"link": link}):
+                continue
+
+            print(f"    📦 {title[:55]}...")
+            size, genres, synopsis, cover = get_deep_details(link)
+
+            if size is None:
+                print(f"    🚫 Skipping adult: {title[:40]}")
+                continue
+
+            print(f"        → {size} | {genres[:2]}")
+
+            collection.insert_one({
+                "title": title,
+                "link": link,
+                "source": "RepackGames",
+                "cover": cover,
+                "rating": 5.0,
+                "genres": genres,
+                "size_raw": size,
+                "synopsis": synopsis
+            })
+            inserted += 1
+
+        print(f"  ✅ Page {page} done")
+        time.sleep(random.uniform(3, 6))
 
     print(f"✅ Latest done — {inserted} new games")
 
-def scrape_by_category(category):
+def scrape_by_category(slug, name):
     inserted = 0
-    start_page = get_resume_page(category) + 1
+    start_page = get_resume_page(slug) + 1
     current = start_page
+    consecutive_failures = 0
+    MAX_FAILURES = 3  # stop after 3 consecutive failed pages
 
     while True:
-        url = (f"{BASE_URL}/category/{category}/page/{current}/"
-               if current > 1 else f"{BASE_URL}/category/{category}/")
-        print(f"  📂 {category} — page {current}...")
+        url = (f"{BASE_URL}/category/{slug}/page/{current}/"
+               if current > 1 else f"{BASE_URL}/category/{slug}/")
+        print(f"  📂 {name} — page {current}...")
 
-        try:
-            res = scraper.get(url, headers=HEADERS, timeout=20)
-            if res.status_code == 404:
-                print(f"  🏁 End of {category}")
+        res = None
+        for attempt in range(3):
+            try:
+                res = scraper.get(url, headers=HEADERS, timeout=30)
                 break
+            except Exception as e:
+                wait = (attempt + 1) * 5
+                print(f"  ⚠️  Attempt {attempt+1} failed, retrying in {wait}s...")
+                time.sleep(wait)
 
-            soup = BeautifulSoup(res.text, "html.parser")
-            game_links = get_game_links_from_soup(soup)
-
-            if not game_links:
-                print(f"  🏁 No games — end of {category}")
+        if not res:
+            consecutive_failures += 1
+            print(f"  ❌ Failed ({consecutive_failures}/{MAX_FAILURES})")
+            if consecutive_failures >= MAX_FAILURES:
+                print(f"  🛑 Too many failures — stopping {name}")
                 break
-
-            print(f"  Found {len(game_links)} games")
-
-            for title, link in game_links:
-                if not is_real_game(title):
-                    continue
-                if any(s in link for s in ["/category/", "/tag/", "/page/", "#"]):
-                    continue
-                if collection.find_one({"link": link}):
-                    continue
-
-                print(f"    📦 {title[:55]}...")
-                size, genres, synopsis, cover = get_deep_details(link)
-
-                cat_cap = category.capitalize()
-                if cat_cap not in genres:
-                    genres.insert(0, cat_cap)
-
-                print(f"        → {size} | {genres[:2]}")
-
-                collection.insert_one({
-                    "title": title,
-                    "link": link,
-                    "source": "RepackGames",
-                    "cover": cover,
-                    "rating": 5.0,
-                    "genres": genres,
-                    "size_raw": size,
-                    "synopsis": synopsis
-                })
-                inserted += 1
-
-            save_resume_page(category, current)
+            save_resume_page(slug, current)
             current += 1
-            time.sleep(random.uniform(2, 4))
+            continue
 
-        except Exception as e:
-            print(f"  ❌ Error: {e}")
+        # Reset failure counter on success
+        consecutive_failures = 0
+
+        if res.status_code == 404:
+            print(f"  🏁 End of {name}")
             break
+
+        soup = BeautifulSoup(res.text, "html.parser")
+        game_links = get_game_links_from_soup(soup)
+
+        if not game_links:
+            print(f"  🏁 No games — end of {name}")
+            break
+
+        print(f"  Found {len(game_links)} games")
+
+        for title, link in game_links:
+            if not is_real_game(title):
+                continue
+            if any(s in link for s in ["/category/", "/tag/", "/page/", "#"]):
+                continue
+            if collection.find_one({"link": link}):
+                continue
+
+            print(f"    📦 {title[:55]}...")
+            size, genres, synopsis, cover = get_deep_details(link)
+
+            if size is None:
+                print(f"    🚫 Skipping adult: {title[:40]}")
+                continue
+
+            if name not in genres:
+                genres.insert(0, name)
+
+            print(f"        → {size} | {genres[:2]}")
+
+            collection.insert_one({
+                "title": title,
+                "link": link,
+                "source": "RepackGames",
+                "cover": cover,
+                "rating": 5.0,
+                "genres": genres,
+                "size_raw": size,
+                "synopsis": synopsis
+            })
+            inserted += 1
+
+        save_resume_page(slug, current)
+        current += 1
+        time.sleep(random.uniform(2, 4))
 
     return inserted
 
 def scrape_all_categories():
     total = 0
-    for cat in CATEGORIES:
-        print(f"\n🎮 Category: {cat.upper()}")
-        n = scrape_by_category(cat)
+    for slug, name in CATEGORIES.items():
+        print(f"\n🎮 Category: {name.upper()}")
+        n = scrape_by_category(slug, name)
         total += n
-        print(f"  ✅ {cat} done — {n} new games")
+        print(f"  ✅ {name} done — {n} new games")
         time.sleep(random.uniform(3, 5))
     print(f"\n🎉 Total: {total} new RepackGames added")
 
@@ -271,5 +339,5 @@ def count():
 
 if __name__ == "__main__":
     count()
-    scrape_latest(pages=10)
-    # scrape_all_categories()  # uncomment after latest works
+    reset_progress()  # clears the bad page 2604 progress
+    scrape_all_categories()
