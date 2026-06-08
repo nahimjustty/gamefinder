@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GameFinRR - Support Us 🏴‍☠️</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body
+    class="bg-[#0B0F17] text-gray-200 min-h-screen font-sans flex flex-col justify-between"
+  >
+    <nav
+      class="max-w-6xl w-full mx-auto p-6 flex justify-between items-center border-b border-gray-800/50"
+    >
+      <a
+        href="index.html"
+        class="text-2xl font-black tracking-wider text-green-400 hover:opacity-80 transition"
+        >GameFinRR 🏴‍☠️</a
+      >
+      <a
+        href="index.html"
+        class="px-4 py-2 bg-gray-800/60 hover:bg-gray-800 border border-gray-700/50 rounded-lg text-sm transition"
+        >Back to Search</a
+      >
+    </nav>
+
+    <main
+      class="max-w-4xl w-full mx-auto px-6 py-12 grid md:grid-cols-5 gap-10 items-start"
+    >
+      <section class="md:col-span-3 space-y-6">
+        <h1 class="text-4xl font-extrabold text-white tracking-tight">
+          Support the Project
+        </h1>
+        <p class="text-gray-400 leading-relaxed text-base">
+          Building and maintaining
+          <span class="text-green-400 font-semibold">GameFinRR</span> is an
+          absolute passion project. The goal is to keep things lightning-fast,
+          highly accurate, and completely free from annoying popups, malicious
+          ads, or premium paywalls.
+        </p>
+        <p class="text-gray-400 leading-relaxed text-base">
+          However, hosting an indexed cloud database tracking over 10,000+
+          games, managing live API server routes, and processing automation
+          scripts requires continuous backend infrastructure costs (MongoDB
+          Atlas, Render, Vercel).
+        </p>
+        <div
+          class="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-yellow-200/90 text-sm"
+        >
+          <strong>Privacy Note:</strong> For security and operational reasons, I
+          cannot accept traditional fiat currencies (PayPal or direct bank
+          transfers). We only accept decentralized cryptocurrencies.
+        </div>
+        <p class="text-xs text-gray-500 italic">
+          Every single donation goes directly toward covering server endpoints,
+          API instances, and automated scraper tasks to keep the index fresh.
+          Thank you for standing with the project!
+        </p>
+      </section>
+
+      <section class="md:col-span-2 space-y-4">
+        <h2
+          class="text-lg font-bold text-gray-400 uppercase tracking-widest text-sm mb-2"
+        >
+          Crypto Addresses
+        </h2>
+
+        <div
+          class="bg-gray-900/50 border border-gray-800 p-4 rounded-xl hover:border-purple-500/30 transition group"
+        >
+          <div class="flex justify-between items-center mb-1">
+            <span
+              class="text-sm font-bold text-purple-400 flex items-center gap-2"
+            >
+              <i class="fa-brands fa-solana"></i> Solana (SOL)
+            </span>
+          </div>
+          <div
+            class="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-gray-800 mt-2"
+          >
+            <input
+              type="text"
+              readonly
+              value="5cvjoayPaZ4vdHhGY7CuuKKch9mWExzpEEhCtP7RJBZn"
+              id="sol-address"
+              class="bg-transparent text-xs text-gray-400 w-full focus:outline-none select-all truncate"
+            />
+            <button
+              onclick="copyToClipboard('sol-address', this)"
+              class="text-gray-500 hover:text-purple-400 p-1 cursor-pointer transition"
+            >
+              <i class="fa-regular fa-copy"></i>
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="bg-gray-900/50 border border-gray-800 p-4 rounded-xl hover:border-blue-500/30 transition group"
+        >
+          <div class="flex justify-between items-center mb-1">
+            <span
+              class="text-sm font-bold text-blue-400 flex items-center gap-2"
+            >
+              <i class="fa-brands fa-ethereum"></i> Ethereum (ETH)
+            </span>
+          </div>
+          <div
+            class="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-gray-800 mt-2"
+          >
+            <input
+              type="text"
+              readonly
+              value="0xbF1C706632586F8CC7A8f6c6482eEad25668e807"
+              id="eth-address"
+              class="bg-transparent text-xs text-gray-400 w-full focus:outline-none select-all truncate"
+            />
+            <button
+              onclick="copyToClipboard('eth-address', this)"
+              class="text-gray-500 hover:text-blue-400 p-1 cursor-pointer transition"
+            >
+              <i class="fa-regular fa-copy"></i>
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="bg-gray-900/50 border border-gray-800 p-4 rounded-xl hover:border-amber-500/30 transition group"
+        >
+          <div class="flex justify-between items-center mb-1">
+            <span
+              class="text-sm font-bold text-amber-500 flex items-center gap-2"
+            >
+              <i class="fa-brands fa-bitcoin"></i> Bitcoin (BTC)
+            </span>
+          </div>
+          <div
+            class="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-gray-800 mt-2"
+          >
+            <input
+              type="text"
+              readonly
+              value="bc1ql7jkummpn2mqfxwh0vkdw084tv26lpyp9wwwlf"
+              id="btc-address"
+              class="bg-transparent text-xs text-gray-400 w-full focus:outline-none select-all truncate"
+            />
+            <button
+              onclick="copyToClipboard('btc-address', this)"
+              class="text-gray-500 hover:text-amber-500 p-1 cursor-pointer transition"
+            >
+              <i class="fa-regular fa-copy"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer
+      class="max-w-6xl w-full mx-auto p-6 border-t border-gray-900/80 text-center text-xs text-gray-600"
+    >
+      GameFinRR does not host any illegal files. We only index links to external
+      platforms.
+    </footer>
+
+    <script>
+      function copyToClipboard(inputId, button) {
+        const copyText = document.getElementById(inputId);
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // Mobile compatibility
+        navigator.clipboard.writeText(copyText.value);
+
+        // Turn icon into a green checkmark feedback indicator
+        const icon = button.querySelector("i");
+        icon.className = "fa-solid fa-check text-green-400";
+
+        // Revert icon behavior back after 2 seconds
+        setTimeout(() => {
+          icon.className = "fa-regular fa-copy";
+        }, 2000);
+      }
+    </script>
+  </body>
+</html>
