@@ -273,3 +273,72 @@ button:active {
     box-shadow: 0 0 12px rgba(255, 68, 68, 0.4);
     transform: translateY(-1px);
 }
+
+/* ── Beta Badge ── */
+.beta-badge {
+    display: inline-block;
+    background: #ff6b35;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 2px;
+    margin-top: 4px;
+}
+
+/* ── Footer ── */
+footer {
+    margin-top: 4rem;
+    border-top: 1px solid #1e1e1e;
+    padding: 2rem 1rem;
+}
+
+.footer-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+
+.disclaimer {
+    color: #555;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    max-width: 600px;
+}
+
+.footer-links {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.donate-btn {
+    background: linear-gradient(135deg, #f7931a, #ff6b35);
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: opacity 0.2s, transform 0.1s;
+    box-shadow: 0 0 12px rgba(247, 147, 26, 0.3);
+}
+
+.donate-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.footer-divider {
+    color: #333;
+}
+
+.footer-copy {
+    color: #444;
+    font-size: 0.78rem;
+}
